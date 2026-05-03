@@ -5,7 +5,9 @@
       <slot />
     </main>
     
-    <!-- Footer (oldingi footer o'zgarishsiz qoladi) -->
+    <!-- Toast komponenti -->
+    <Toast />
+    
     <footer class="bg-white border-t mt-16">
       <div class="container mx-auto px-4 py-8">
         <div class="grid md:grid-cols-4 gap-8">
@@ -15,7 +17,6 @@
               Yuklaringizni tez va xavfsiz tashish xizmati
             </p>
           </div>
-          
           <div>
             <h3 class="font-semibold text-gray-800 mb-4">Tezkor havolalar</h3>
             <ul class="space-y-2 text-sm">
@@ -24,7 +25,6 @@
               <li><NuxtLink to="/drivers" class="text-gray-600 hover:text-blue-600">Haydovchilar</NuxtLink></li>
             </ul>
           </div>
-          
           <div>
             <h3 class="font-semibold text-gray-800 mb-4">Foydali</h3>
             <ul class="space-y-2 text-sm">
@@ -33,7 +33,6 @@
               <li><a href="#" class="text-gray-600 hover:text-blue-600">Qoidalar</a></li>
             </ul>
           </div>
-          
           <div>
             <h3 class="font-semibold text-gray-800 mb-4">Bog'lanish</h3>
             <ul class="space-y-2 text-sm text-gray-600">
@@ -43,7 +42,6 @@
             </ul>
           </div>
         </div>
-        
         <div class="border-t mt-8 pt-8 text-center text-gray-500 text-sm">
           <p>&copy; 2024 Yukchi.uz. Barcha huquqlar himoyalangan.</p>
         </div>
@@ -53,6 +51,7 @@
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue'
-import Logo from '@/components/Logo.vue'
+import Navbar from '~/components/Navbar.vue'
+import Toast from '~/components/Toast.vue'
+import Logo from '~/components/Logo.vue'
 </script>

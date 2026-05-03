@@ -116,13 +116,13 @@ export const useApi = () => {
     
     // Yangi: Xabar yuborish
     async sendMessage(orderId, message) {
-      const response = await fetch(`${baseURL}/orders/${orderId}/contract/message`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({ message })
-      })
-      return handleResponse(response)
-    },
+  const response = await fetch(`${baseURL}/orders/${orderId}/contract/message`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ message })
+  })
+  return handleResponse(response)
+},
     
     // Drivers
     async getDrivers(params = {}) {
@@ -140,7 +140,23 @@ export const useApi = () => {
       })
       return handleResponse(response)
     },
-    
+    // Drivers - yangi funksiyalar
+async updateDriver(id, data) {
+  const response = await fetch(`${baseURL}/drivers/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(data)
+  })
+  return handleResponse(response)
+},
+
+async deleteDriver(id) {
+  const response = await fetch(`${baseURL}/drivers/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders()
+  })
+  return handleResponse(response)
+},
     // Users
     async getUsers() {
       const response = await fetch(`${baseURL}/users`, {

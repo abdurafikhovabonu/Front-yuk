@@ -16,7 +16,7 @@
               to="/create-order"
               class="inline-flex items-center justify-center px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105"
             >
-              Yuk topsh
+              Elon berish
               <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
               </svg>
@@ -25,7 +25,7 @@
               to="/drivers"
               class="inline-flex items-center justify-center px-8 py-3 bg-blue-700 text-white rounded-lg font-semibold hover:bg-blue-800 transition"
             >
-              Haydovchi top
+              Haydovchi topish
             </NuxtLink>
           </div>
         </div>
@@ -193,7 +193,7 @@
         to="/create-order"
         class="inline-block px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105"
       >
-        Yuk topsh
+        Elon berish
       </NuxtLink>
     </section>
   </div>
