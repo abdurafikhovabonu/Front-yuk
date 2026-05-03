@@ -53,26 +53,26 @@
             <h1 class="text-3xl font-bold text-gray-800">Buyurtmalar</h1>
             <p class="text-gray-500 mt-1">Tizimdagi barcha buyurtmalarni boshqaring</p>
           </div>
-          <button @click="showCreateModal = true" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          <button @click="openCreateModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
             + Yangi buyurtma
           </button>
         </div>
         
         <!-- Stats -->
         <div class="grid md:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white rounded-xl shadow-md p-4">
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
             <p class="text-gray-500 text-sm">Jami buyurtmalar</p>
             <p class="text-2xl font-bold text-gray-800">{{ orders.length }}</p>
           </div>
-          <div class="bg-white rounded-xl shadow-md p-4">
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
             <p class="text-gray-500 text-sm">Kutilmoqda</p>
             <p class="text-2xl font-bold text-yellow-600">{{ orders.filter(o => o.status === 'pending').length }}</p>
           </div>
-          <div class="bg-white rounded-xl shadow-md p-4">
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
             <p class="text-gray-500 text-sm">Bajarilgan</p>
             <p class="text-2xl font-bold text-green-600">{{ orders.filter(o => o.status === 'completed').length }}</p>
           </div>
-          <div class="bg-white rounded-xl shadow-md p-4">
+          <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
             <p class="text-gray-500 text-sm">Umumiy tushum</p>
             <p class="text-2xl font-bold text-blue-600">{{ formatPrice(totalRevenue) }}</p>
           </div>
@@ -95,7 +95,7 @@
               <option value="completed">Bajarilgan</option>
               <option value="cancelled">Bekor qilingan</option>
             </select>
-            <button @click="clearFilters" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            <button @click="clearFilters" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
               Tozalash
             </button>
           </div>
@@ -105,6 +105,7 @@
         <div class="bg-white rounded-2xl shadow-md overflow-hidden">
           <div v-if="loading" class="text-center py-12">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-500">Buyurtmalar yuklanmoqda...</p>
           </div>
           
           <div v-else-if="filteredOrders.length === 0" class="text-center py-12">
@@ -112,6 +113,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
             </svg>
             <p class="text-gray-500">Buyurtmalar topilmadi</p>
+            <button @click="clearFilters" class="mt-4 text-blue-600 hover:text-blue-800">
+              Filtrlarni tozalash →
+            </button>
           </div>
           
           <div v-else class="overflow-x-auto">
@@ -130,7 +134,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y">
-                <tr v-for="order in filteredOrders" :key="order.id" class="hover:bg-gray-50">
+                <tr v-for="order in filteredOrders" :key="order.id" class="hover:bg-gray-50 transition">
                   <td class="px-6 py-4 text-sm text-gray-500">#{{ order.id }}</td>
                   <td class="px-6 py-4">
                     <div class="flex items-center space-x-2">
@@ -160,34 +164,34 @@
                   <td class="px-6 py-4">
                     <select 
                       :value="order.status"
-                      @change="changeStatus(order.id, $event.target.value)"
+                      @change="openStatusModal(order.id, $event.target.value)"
                       :class="getStatusClass(order.status)"
                       class="px-3 py-1 rounded-full text-xs font-semibold border-0 cursor-pointer"
                     >
-                      <option value="pending" :class="getStatusClass('pending')">Kutilmoqda</option>
-                      <option value="negotiation" :class="getStatusClass('negotiation')">Muzokarada</option>
-                      <option value="accepted" :class="getStatusClass('accepted')">Qabul qilingan</option>
-                      <option value="completed" :class="getStatusClass('completed')">Bajarilgan</option>
-                      <option value="cancelled" :class="getStatusClass('cancelled')">Bekor qilingan</option>
+                      <option value="pending">Kutilmoqda</option>
+                      <option value="negotiation">Muzokarada</option>
+                      <option value="accepted">Qabul qilingan</option>
+                      <option value="completed">Bajarilgan</option>
+                      <option value="cancelled">Bekor qilingan</option>
                     </select>
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(order.createdAt) }}</td>
                   <td class="px-6 py-4">
                     <div class="flex space-x-2">
-                      <button @click="viewOrder(order)" class="text-blue-600 hover:text-blue-800 p-1">
+                      <button @click="viewOrder(order)" class="text-blue-600 hover:text-blue-800 p-1 transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                       </button>
-                      <button @click="deleteOrder(order.id)" class="text-red-600 hover:text-red-800 p-1">
+                      <button @click="openDeleteModal(order.id)" class="text-red-600 hover:text-red-800 p-1 transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                       </button>
                     </div>
-                  </td>
-                </tr>
+                   </td>
+                 </tr>
               </tbody>
             </table>
           </div>
@@ -196,70 +200,100 @@
     </div>
     
     <!-- Create Order Modal -->
-    <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Yangi buyurtma</h2>
-            <button @click="showCreateModal = false" class="text-gray-400 hover:text-gray-600">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
+    <Modal ref="createModal" title="Yangi buyurtma" @confirm="createOrder" :hideConfirmButton="true">
+      <template #body>
+        <form @submit.prevent="createOrder">
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Qayerdan *</label>
+              <input v-model="newOrder.from" type="text" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Qayerga *</label>
+              <input v-model="newOrder.to" type="text" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Yuk turi *</label>
+              <select v-model="newOrder.cargo" required class="w-full border rounded-lg px-3 py-2">
+                <option value="">Tanlang</option>
+                <option value="Mebel">Mebel</option>
+                <option value="Oziq-ovqat">Oziq-ovqat</option>
+                <option value="Qurilish">Qurilish materiallari</option>
+                <option value="Elektronika">Elektronika</option>
+                <option value="Boshqa">Boshqa</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Og'irligi *</label>
+              <input v-model="newOrder.weight" type="text" placeholder="500 kg" required class="w-full border rounded-lg px-3 py-2">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Narxi (so'm) *</label>
+              <input v-model="newOrder.price" type="number" required class="w-full border rounded-lg px-3 py-2">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Mijoz ID</label>
+              <input v-model="newOrder.userId" type="number" placeholder="Mijozning ID si" class="w-full border rounded-lg px-3 py-2">
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm mb-1">Tavsif</label>
+            <textarea v-model="newOrder.description" rows="3" class="w-full border rounded-lg px-3 py-2"></textarea>
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button type="button" @click="closeCreateModal" class="px-4 py-2 border rounded-lg hover:bg-gray-50 transition">
+              Bekor qilish
+            </button>
+            <button type="submit" :disabled="creating" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              {{ creating ? 'Yaratilmoqda...' : 'Buyurtma yaratish' }}
             </button>
           </div>
-          
-          <form @submit.prevent="createOrder">
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label class="block text-gray-700 text-sm mb-1">Qayerdan *</label>
-                <input v-model="newOrder.from" type="text" required class="w-full border rounded-lg px-3 py-2">
-              </div>
-              <div>
-                <label class="block text-gray-700 text-sm mb-1">Qayerga *</label>
-                <input v-model="newOrder.to" type="text" required class="w-full border rounded-lg px-3 py-2">
-              </div>
-              <div>
-                <label class="block text-gray-700 text-sm mb-1">Yuk turi *</label>
-                <select v-model="newOrder.cargo" required class="w-full border rounded-lg px-3 py-2">
-                  <option value="">Tanlang</option>
-                  <option value="Mebel">Mebel</option>
-                  <option value="Oziq-ovqat">Oziq-ovqat</option>
-                  <option value="Qurilish">Qurilish materiallari</option>
-                  <option value="Elektronika">Elektronika</option>
-                  <option value="Boshqa">Boshqa</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-gray-700 text-sm mb-1">Og'irligi *</label>
-                <input v-model="newOrder.weight" type="text" placeholder="500 kg" required class="w-full border rounded-lg px-3 py-2">
-              </div>
-              <div>
-                <label class="block text-gray-700 text-sm mb-1">Narxi (so'm) *</label>
-                <input v-model="newOrder.price" type="number" required class="w-full border rounded-lg px-3 py-2">
-              </div>
-              <div>
-                <label class="block text-gray-700 text-sm mb-1">Mijoz ID</label>
-                <input v-model="newOrder.userId" type="number" placeholder="Mijozning ID si" class="w-full border rounded-lg px-3 py-2">
-              </div>
-            </div>
-            
-            <div class="mb-4">
-              <label class="block text-gray-700 text-sm mb-1">Tavsif</label>
-              <textarea v-model="newOrder.description" rows="3" class="w-full border rounded-lg px-3 py-2"></textarea>
-            </div>
-            
-            <div class="flex justify-end space-x-3">
-              <button type="button" @click="showCreateModal = false" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
-                Bekor qilish
-              </button>
-              <button type="submit" :disabled="creating" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                {{ creating ? 'Yaratilmoqda...' : 'Buyurtma yaratish' }}
-              </button>
-            </div>
-          </form>
+        </form>
+      </template>
+    </Modal>
+    
+    <!-- Status Change Modal -->
+    <Modal ref="statusModal" title="Holatni o'zgartirish" @confirm="confirmStatusChange">
+      <template #body>
+        <div class="text-center">
+          <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <p class="text-lg font-semibold text-gray-800 mb-2">Buyurtma holatini o'zgartirmoqchimisiz?</p>
+          <p class="text-sm text-gray-500">
+            Holatni <span class="font-semibold text-blue-600">{{ getStatusText(oldStatus) }}</span> dan 
+            <span class="font-semibold text-green-600">{{ getStatusText(newStatus) }}</span> ga o'zgartirmoqchisiz.
+          </p>
+          <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-800">
+              <span class="font-semibold">Eslatma:</span> Holat o'zgarishi mijoz va haydovchiga bildiriladi.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </Modal>
+    
+    <!-- Delete Modal -->
+    <Modal ref="deleteModal" title="Buyurtmani o'chirish" @confirm="confirmDelete">
+      <template #body>
+        <div class="text-center">
+          <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </div>
+          <p class="text-lg font-semibold text-gray-800 mb-2">Buyurtmani o'chirmoqchimisiz?</p>
+          <p class="text-sm text-gray-500">Bu amalni qaytarib bo'lmaydi. Buyurtma butunlay o'chirib tashlanadi.</p>
+          <div class="mt-4 p-3 bg-red-50 rounded-lg">
+            <p class="text-sm text-red-800">
+              <span class="font-semibold">Ogohlantirish:</span> O'chirilgan buyurtmani qayta tiklash imkoniyati yo'q!
+            </p>
+          </div>
+        </div>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -269,15 +303,21 @@ definePageMeta({
 })
 
 const api = useApi()
+const toast = useToast()
 
 const orders = ref([])
 const loading = ref(true)
 const search = ref('')
 const statusFilter = ref('')
 const totalRevenue = ref(0)
-const showCreateModal = ref(false)
 const creating = ref(false)
 
+// Modal refs
+const createModal = ref(null)
+const statusModal = ref(null)
+const deleteModal = ref(null)
+
+// Form data
 const newOrder = ref({
   from: '',
   to: '',
@@ -287,6 +327,14 @@ const newOrder = ref({
   description: '',
   userId: ''
 })
+
+// Status change data
+const selectedOrderId = ref(null)
+const oldStatus = ref('')
+const newStatus = ref('')
+
+// Delete data
+const deleteOrderId = ref(null)
 
 const filteredOrders = computed(() => {
   let result = orders.value
@@ -317,55 +365,83 @@ const loadOrders = async () => {
   try {
     orders.value = await api.getOrders()
     totalRevenue.value = orders.value.reduce((sum, o) => sum + (o.price || 0), 0)
+    toast.success(`${orders.value.length} ta buyurtma yuklandi`)
   } catch (error) {
     console.error('Error loading orders:', error)
+    toast.error('Buyurtmalarni yuklashda xatolik')
   } finally {
     loading.value = false
   }
 }
 
+// Create order functions
+const openCreateModal = () => {
+  createModal.value?.open()
+}
+
+const closeCreateModal = () => {
+  createModal.value?.close()
+  newOrder.value = { from: '', to: '', cargo: '', weight: '', price: '', description: '', userId: '' }
+}
+
 const createOrder = async () => {
   if (!newOrder.value.from || !newOrder.value.to || !newOrder.value.cargo || !newOrder.value.weight || !newOrder.value.price) {
-    alert('Barcha majburiy maydonlarni to\'ldiring!')
+    toast.warning('Barcha majburiy maydonlarni to\'ldiring!')
     return
   }
   
   creating.value = true
   try {
     await api.createOrder(newOrder.value)
-    showCreateModal.value = false
-    newOrder.value = { from: '', to: '', cargo: '', weight: '', price: '', description: '', userId: '' }
+    closeCreateModal()
     await loadOrders()
-    alert('Buyurtma muvaffaqiyatli yaratildi')
+    toast.success('Buyurtma muvaffaqiyatli yaratildi')
   } catch (error) {
     console.error('Error creating order:', error)
-    alert('Xatolik yuz berdi: ' + error.message)
+    toast.error('Xatolik yuz berdi: ' + error.message)
   } finally {
     creating.value = false
   }
 }
 
-const changeStatus = async (id, newStatus) => {
-  try {
-    await api.updateOrder(id, { status: newStatus })
-    await loadOrders()
-    alert('Buyurtma holati o\'zgartirildi')
-  } catch (error) {
-    console.error('Error changing status:', error)
-    alert('Xatolik yuz berdi: ' + error.message)
+// Status change functions
+const openStatusModal = (id, newStat) => {
+  const order = orders.value.find(o => o.id === id)
+  if (order) {
+    selectedOrderId.value = id
+    oldStatus.value = order.status
+    newStatus.value = newStat
+    statusModal.value?.open()
   }
 }
 
-const deleteOrder = async (id) => {
-  if (confirm('Buyurtmani o\'chirmoqchimisiz?')) {
-    try {
-      await api.deleteOrder(id)
-      await loadOrders()
-      alert('Buyurtma o\'chirildi')
-    } catch (error) {
-      console.error('Error deleting order:', error)
-      alert('Xatolik yuz berdi: ' + error.message)
-    }
+const confirmStatusChange = async () => {
+  try {
+    await api.updateOrder(selectedOrderId.value, { status: newStatus.value })
+    await loadOrders()
+    statusModal.value?.close()
+    toast.success(`Buyurtma holati o'zgartirildi: ${getStatusText(newStatus.value)}`)
+  } catch (error) {
+    console.error('Error changing status:', error)
+    toast.error('Xatolik yuz berdi: ' + error.message)
+  }
+}
+
+// Delete functions
+const openDeleteModal = (id) => {
+  deleteOrderId.value = id
+  deleteModal.value?.open()
+}
+
+const confirmDelete = async () => {
+  try {
+    await api.deleteOrder(deleteOrderId.value)
+    await loadOrders()
+    deleteModal.value?.close()
+    toast.success('Buyurtma o\'chirildi')
+  } catch (error) {
+    console.error('Error deleting order:', error)
+    toast.error('Xatolik yuz berdi: ' + error.message)
   }
 }
 
@@ -376,6 +452,7 @@ const viewOrder = (order) => {
 const clearFilters = () => {
   search.value = ''
   statusFilter.value = ''
+  toast.info('Filterlar tozalandi')
 }
 
 const getStatusClass = (status) => {
@@ -387,6 +464,17 @@ const getStatusClass = (status) => {
     cancelled: 'bg-red-100 text-red-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+const getStatusText = (status) => {
+  const texts = {
+    pending: 'Kutilmoqda',
+    negotiation: 'Muzokarada',
+    accepted: 'Qabul qilingan',
+    completed: 'Bajarilgan',
+    cancelled: 'Bekor qilingan'
+  }
+  return texts[status] || status
 }
 
 const formatPrice = (price) => {
