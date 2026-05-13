@@ -142,6 +142,7 @@
 <script setup>
 const { getMyProposals, sendMessage: sendMessageApi, updateOrder } = useApi()
 const router = useRouter()
+const toast = useToast()
 
 const orderId = (order) => {
   if (!order) return ''
@@ -168,9 +169,7 @@ const loadMyProposals = async () => {
   loading.value = true
   try {
     proposals.value = await getMyProposals()
-  } catch (error) {
-    console.error('Error loading proposals:', error)
-    const toast = useToast()
+  } catch {
     toast.error('Takliflarni yuklashda xatolik')
   } finally {
     loading.value = false
@@ -190,9 +189,8 @@ const sendMessage = async (orderId) => {
     await sendMessageApi(orderId, message)
     newMessages.value[orderId] = ''
     await loadMyProposals()
-  } catch (error) {
-    console.error('Error sending message:', error)
-    alert('Xabarni yuborishda xatolik')
+  } catch {
+    toast.error('Xabarni yuborishda xatolik')
   } finally {
     sending.value[orderId] = false
   }
@@ -203,10 +201,9 @@ const cancelProposal = async (orderId) => {
     try {
       await updateOrder(orderId, { status: 'pending', contract: null, driverId: null })
       await loadMyProposals()
-      alert('Taklif bekor qilindi')
-    } catch (error) {
-      console.error('Error canceling proposal:', error)
-      alert('Xatolik yuz berdi')
+      toast.success('Taklif bekor qilindi')
+    } catch {
+      toast.error('Xatolik yuz berdi')
     }
   }
 }

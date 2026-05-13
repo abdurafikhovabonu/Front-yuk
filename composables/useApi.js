@@ -61,7 +61,6 @@ export const useApi = () => {
     },
     
  async getOrder(id) {
-  console.log('API getOrder called with id:', id)
   if (!id || id === 'undefined') {
     throw new Error('Invalid order ID')
   }
@@ -108,7 +107,6 @@ export const useApi = () => {
     // ... boshqa metodlar
 
 async getNews() {
-  console.log('Fetching news from API...'); // Debug
   const response = await fetch(`${baseURL}/news`, {
     headers: getHeaders()
   })
@@ -116,7 +114,6 @@ async getNews() {
 },
 
 async getNewsBySlug(slug) {
-  console.log('Fetching news by slug:', slug); // Debug
   const response = await fetch(`${baseURL}/news/${slug}`, {
     headers: getHeaders()
   })
@@ -124,7 +121,6 @@ async getNewsBySlug(slug) {
 },
     // Yangi: Shartnoma yaratish (taklif berish)
     async createContract(orderId, data) {
-      console.log('Calling createContract API:', orderId, data)
       const response = await fetch(`${baseURL}/orders/${orderId}/contract`, {
         method: 'POST',
         headers: getHeaders(),
@@ -144,7 +140,6 @@ async getNewsBySlug(slug) {
     
     // Yangi: Xabar yuborish
 async sendMessage(orderId, message) {
-  console.log('API sendMessage called:', orderId, message)
   const response = await fetch(`${baseURL}/orders/${orderId}/contract/message`, {
     method: 'POST',
     headers: getHeaders(),
@@ -189,6 +184,46 @@ async deleteDriver(id) {
     // Users
     async getUsers() {
       const response = await fetch(`${baseURL}/users`, {
+        headers: getHeaders()
+      })
+      return handleResponse(response)
+    },
+
+    async getAdminNewsList() {
+      const response = await fetch(`${baseURL}/news/admin/list`, {
+        headers: getHeaders()
+      })
+      return handleResponse(response)
+    },
+
+    async getAdminNewsById(id) {
+      const response = await fetch(`${baseURL}/news/admin/item/${id}`, {
+        headers: getHeaders()
+      })
+      return handleResponse(response)
+    },
+
+    async createNews(data) {
+      const response = await fetch(`${baseURL}/news`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      })
+      return handleResponse(response)
+    },
+
+    async updateNews(id, data) {
+      const response = await fetch(`${baseURL}/news/admin/${id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      })
+      return handleResponse(response)
+    },
+
+    async deleteNews(id) {
+      const response = await fetch(`${baseURL}/news/admin/${id}`, {
+        method: 'DELETE',
         headers: getHeaders()
       })
       return handleResponse(response)

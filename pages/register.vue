@@ -76,6 +76,7 @@
 <script setup>
 const { register } = useApi()
 const router = useRouter()
+const toast = useToast()
 const loading = ref(false)
 
 const form = ref({
@@ -102,7 +103,7 @@ const handleRegister = async () => {
   // Validation for driver
   if (form.value.role === 'driver') {
     if (!form.value.carType || !form.value.carNumber || !form.value.pricePerKm) {
-      alert('Iltimos, barcha mashina ma\'lumotlarini to\'ldiring!')
+      toast.warning('Iltimos, barcha mashina ma\'lumotlarini to\'ldiring!')
       return
     }
   }
@@ -114,7 +115,7 @@ const handleRegister = async () => {
     localStorage.setItem('user', JSON.stringify(response.user))
     router.push('/')
   } catch (error) {
-    alert(error.message)
+    toast.error(error.message || 'Ro\'yxatdan o\'tishda xatolik')
   } finally {
     loading.value = false
   }

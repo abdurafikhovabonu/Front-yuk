@@ -174,9 +174,6 @@ const handleLogin = async () => {
     }, 500)
     
   } catch (error) {
-    console.error('Login error:', error)
-    
-    // Xatolik turiga qarab xabar
     if (error.message.includes('401') || error.message.includes('Invalid')) {
       toast.error('Email yoki parol noto\'g\'ri!')
     } else {

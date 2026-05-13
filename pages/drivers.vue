@@ -254,6 +254,7 @@
 <script setup>
 const { getDrivers } = useApi()
 const router = useRouter()
+const toast = useToast()
 
 const drivers = ref([])
 const loading = ref(true)
@@ -282,10 +283,7 @@ const loadDrivers = async () => {
   loading.value = true
   try {
     drivers.value = await getDrivers()
-    console.log('Drivers loaded:', drivers.value)
-  } catch (error) {
-    console.error('Error loading drivers:', error)
-    const toast = useToast()
+  } catch {
     toast.error('Haydovchilarni yuklashda xatolik')
   } finally {
     loading.value = false
@@ -316,7 +314,6 @@ const filteredDrivers = computed(() => {
 
 const applyFilters = () => {
   // Filter is reactive, no need to do anything
-  const toast = useToast()
   toast.info(`🔍 ${filteredDrivers.value.length} ta haydovchi topildi`)
 }
 
@@ -358,7 +355,6 @@ const closeOrderModal = () => {
 }
 
 const confirmOrder = () => {
-  const toast = useToast()
   toast.success(`Yuk topshirish formasi ochilmoqda...`)
   closeOrderModal()
   router.push(`/create-order?driverId=${selectedDriver.value?.id}`)

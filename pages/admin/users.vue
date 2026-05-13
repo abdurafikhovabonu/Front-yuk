@@ -5,6 +5,7 @@ definePageMeta({
 
 // useApi dan funksiyalarni olish
 const api = useApi()
+const toast = useToast()
 
 const users = ref([])
 const loading = ref(true)
@@ -37,10 +38,8 @@ const loadUsers = async () => {
   loading.value = true
   try {
     users.value = await api.getUsers()
-    console.log('Users loaded:', users.value)
   } catch (error) {
-    console.error('Error loading users:', error)
-    alert('Foydalanuvchilarni yuklashda xatolik: ' + error.message)
+    toast.error('Foydalanuvchilarni yuklashda xatolik')
   } finally {
     loading.value = false
   }
@@ -52,7 +51,7 @@ const clearFilters = () => {
 }
 
 const editUser = (user) => {
-  alert(`Tahrirlash funksiyasi tayyorlanmoqda: ${user.name}`)
+  toast.info(`Tahrirlash funksiyasi tayyorlanmoqda: ${user.name}`)
 }
 
 const handleDeleteUser = async (id) => {
@@ -60,10 +59,9 @@ const handleDeleteUser = async (id) => {
     try {
       await api.deleteUser(id)
       await loadUsers()
-      alert('Foydalanuvchi o\'chirildi')
+      toast.success('Foydalanuvchi o\'chirildi')
     } catch (error) {
-      console.error('Error deleting user:', error)
-      alert('Xatolik yuz berdi: ' + error.message)
+      toast.error('Xatolik yuz berdi: ' + (error?.message || ''))
     }
   }
 }
@@ -72,10 +70,9 @@ const changeRole = async (id, newRole) => {
   try {
     await api.updateUserRole(id, newRole)
     await loadUsers()
-    alert('Rol muvaffaqiyatli o\'zgartirildi')
+    toast.success('Rol muvaffaqiyatli o\'zgartirildi')
   } catch (error) {
-    console.error('Error changing role:', error)
-    alert('Xatolik yuz berdi: ' + error.message)
+    toast.error('Xatolik yuz berdi: ' + (error?.message || ''))
   }
 }
 

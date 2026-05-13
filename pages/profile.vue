@@ -225,6 +225,7 @@ import OrderCard from '~/components/OrderCard.vue'
 
 const { getOrders, updateOrder } = useApi()
 const router = useRouter()
+const toast = useToast()
 
 // User data
 const userData = ref({})
@@ -290,8 +291,8 @@ const loadUserOrders = async () => {
   try {
     const orders = await getOrders()
     userOrders.value = orders.filter(order => order.userId === userData.value.id)
-  } catch (error) {
-    console.error('Error loading orders:', error)
+  } catch {
+    toast.error('Buyurtmalarni yuklashda xatolik')
   } finally {
     loadingOrders.value = false
   }
@@ -306,10 +307,9 @@ const updateProfile = async () => {
     userData.value = updatedUser
     
     // Show success message
-    alert('Ma\'lumotlar muvaffaqiyatli yangilandi!')
-  } catch (error) {
-    console.error('Error updating profile:', error)
-    alert('Xatolik yuz berdi. Qaytadan urinib ko\'ring.')
+    toast.success('Ma\'lumotlar muvaffaqiyatli yangilandi!')
+  } catch {
+    toast.error('Xatolik yuz berdi. Qaytadan urinib ko\'ring.')
   } finally {
     updating.value = false
   }
@@ -317,12 +317,12 @@ const updateProfile = async () => {
 
 const changePassword = async () => {
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    alert('Yangi parollar mos kelmadi!')
+    toast.warning('Yangi parollar mos kelmadi!')
     return
   }
   
   if (passwordForm.value.newPassword.length < 6) {
-    alert('Parol kamida 6 belgidan iborat bo\'lishi kerak!')
+    toast.warning('Parol kamida 6 belgidan iborat bo\'lishi kerak!')
     return
   }
   
@@ -330,22 +330,21 @@ const changePassword = async () => {
   try {
     // Here you would call API to change password
     // For now, just show success
-    alert('Parol muvaffaqiyatli o\'zgartirildi!')
+    toast.success('Parol muvaffaqiyatli o\'zgartirildi!')
     passwordForm.value = {
       currentPassword: '',
       newPassword: '',
       confirmPassword: ''
     }
-  } catch (error) {
-    console.error('Error changing password:', error)
-    alert('Xatolik yuz berdi. Qaytadan urinib ko\'ring.')
+  } catch {
+    toast.error('Xatolik yuz berdi. Qaytadan urinib ko\'ring.')
   } finally {
     changingPassword.value = false
   }
 }
 
 const changeAvatar = () => {
-  alert('Rasm o\'zgartirish funksiyasi keyingi versiyada qo\'shiladi!')
+  toast.info('Rasm o\'zgartirish funksiyasi keyingi versiyada qo\'shiladi!')
 }
 
 const viewOrder = (id) => {

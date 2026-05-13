@@ -5,7 +5,6 @@
       <slot />
     </main>
     
-    <!-- Toast komponenti -->
     <Toast />
     
     <footer class="bg-white border-t mt-16">
@@ -14,27 +13,27 @@
           <div>
             <Logo />
             <p class="text-gray-600 text-sm mt-4">
-              Yuklaringizni tez va xavfsiz tashish xizmati
+              {{ t('footer.tagline') }}
             </p>
           </div>
           <div>
-            <h3 class="font-semibold text-gray-800 mb-4">Tezkor havolalar</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{{ t('footer.quickLinks') }}</h3>
             <ul class="space-y-2 text-sm">
-              <li><NuxtLink to="/" class="text-gray-600 hover:text-blue-600">Bosh sahifa</NuxtLink></li>
-              <li><NuxtLink to="/create-order" class="text-gray-600 hover:text-blue-600">Yuk topsh</NuxtLink></li>
-              <li><NuxtLink to="/drivers" class="text-gray-600 hover:text-blue-600">Haydovchilar</NuxtLink></li>
+              <li><NuxtLink to="/" class="text-gray-600 hover:text-blue-600">{{ t('nav.home') }}</NuxtLink></li>
+              <li><NuxtLink to="/create-order" class="text-gray-600 hover:text-blue-600">{{ t('nav.createLoad') }}</NuxtLink></li>
+              <li><NuxtLink to="/drivers" class="text-gray-600 hover:text-blue-600">{{ t('nav.drivers') }}</NuxtLink></li>
             </ul>
           </div>
           <div>
-            <h3 class="font-semibold text-gray-800 mb-4">Foydali</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{{ t('footer.useful') }}</h3>
             <ul class="space-y-2 text-sm">
-              <li><a href="#" class="text-gray-600 hover:text-blue-600">Yordam</a></li>
-              <li><a href="#" class="text-gray-600 hover:text-blue-600">FAQ</a></li>
-              <li><a href="#" class="text-gray-600 hover:text-blue-600">Qoidalar</a></li>
+              <li><a href="#" class="text-gray-600 hover:text-blue-600">{{ t('footer.help') }}</a></li>
+              <li><a href="#" class="text-gray-600 hover:text-blue-600">{{ t('footer.faq') }}</a></li>
+              <li><a href="#" class="text-gray-600 hover:text-blue-600">{{ t('footer.rules') }}</a></li>
             </ul>
           </div>
           <div>
-            <h3 class="font-semibold text-gray-800 mb-4">Bog'lanish</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{{ t('footer.contact') }}</h3>
             <ul class="space-y-2 text-sm text-gray-600">
               <li>📞 +998 71 123 45 67</li>
               <li>✉️ info@yukchi.uz</li>
@@ -43,7 +42,7 @@
           </div>
         </div>
         <div class="border-t mt-8 pt-8 text-center text-gray-500 text-sm">
-          <p>&copy; 2024 Yukchi.uz. Barcha huquqlar himoyalangan.</p>
+          <p>&copy; {{ year }} Yukchi.uz. {{ t('footer.rights') }}</p>
         </div>
       </div>
     </footer>
@@ -54,4 +53,7 @@
 import Navbar from '~/components/Navbar.vue'
 import Toast from '~/components/Toast.vue'
 import Logo from '~/components/Logo.vue'
+
+const { t } = useI18n()
+const year = new Date().getFullYear()
 </script>

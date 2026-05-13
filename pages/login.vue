@@ -44,6 +44,7 @@
 <script setup>
 const { login } = useApi()
 const router = useRouter()
+const toast = useToast()
 const loading = ref(false)
 const form = ref({
   email: '',
@@ -58,7 +59,7 @@ const handleLogin = async () => {
     localStorage.setItem('user', JSON.stringify(response.user))
     router.push('/')
   } catch (error) {
-    alert(error.message)
+    toast.error(error.message || 'Kirishda xatolik')
   } finally {
     loading.value = false
   }

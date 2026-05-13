@@ -391,8 +391,7 @@ onMounted(() => {
 const loadDrivers = async () => {
   try {
     drivers.value = await getDrivers({ available: true })
-  } catch (error) {
-    console.error('Error loading drivers:', error)
+  } catch {
     toast.error('Haydovchilarni yuklashda xatolik')
   } finally {
     loading.value = false

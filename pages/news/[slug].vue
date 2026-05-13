@@ -85,6 +85,7 @@
 <script setup>
 const route = useRoute()
 const { getNews } = useApi()
+const toast = useToast()
 
 const news = ref(null)
 const loading = ref(true)
@@ -106,8 +107,8 @@ const loadNews = async () => {
   try {
     allNews.value = await getNews()
     news.value = allNews.value.find(n => n.slug === route.params.slug)
-  } catch (error) {
-    console.error('Error loading news:', error)
+  } catch {
+    toast.error('Yangilikni yuklashda xatolik')
   } finally {
     loading.value = false
   }

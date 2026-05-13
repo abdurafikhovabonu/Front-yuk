@@ -74,20 +74,4 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['propose', 'view'])
-
-const makeProposal = () => {
-  if (!props.load._id) {
-    console.error('Load ID is undefined')
-    return
-  }
-  emit('propose', props.load._id)
-}
-
-const viewDetails = () => {
-  if (!props.load._id) {
-    console.error('Load ID is undefined')
-    return
-  }
-  emit('view', props.load._id)
-}
 </script>

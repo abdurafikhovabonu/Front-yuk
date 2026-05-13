@@ -164,6 +164,7 @@
 <script setup>
 const { getOrders, acceptContract, updateOrder } = useApi()
 const router = useRouter()
+const toast = useToast()
 
 /** API Mongo buyurtma ID si (_id), id maydoni bo‘lmasligi mumkin */
 const orderId = (order) => {
@@ -191,10 +192,7 @@ const loadProposals = async () => {
     proposals.value = allOrders.filter(order => 
       order.status === 'negotiation' && order.contract
     )
-    console.log('Proposals:', proposals.value)
-  } catch (error) {
-    console.error('Error loading proposals:', error)
-    const toast = useToast()
+  } catch {
     toast.error('Takliflarni yuklashda xatolik')
   } finally {
     loading.value = false
@@ -213,8 +211,6 @@ const closeAcceptModal = () => {
 }
 
 const confirmAccept = async () => {
-  const toast = useToast()
-  
   try {
     await acceptContract(selectedOrderId.value)
     toast.success('Taklif muvaffaqiyatli qabul qilindi!')
@@ -222,8 +218,7 @@ const confirmAccept = async () => {
     await loadProposals()
     router.push('/orders')
   } catch (error) {
-    console.error('Error accepting proposal:', error)
-    toast.error('Xatolik yuz berdi: ' + error.message)
+    toast.error('Xatolik yuz berdi: ' + (error?.message || ''))
   }
 }
 
@@ -239,25 +234,21 @@ const closeRejectModal = () => {
 }
 
 const confirmReject = async () => {
-  const toast = useToast()
-  
   try {
     await updateOrder(selectedOrderId.value, { status: 'pending', contract: null })
     toast.success('Taklif rad etildi')
     closeRejectModal()
     await loadProposals()
-  } catch (error) {
-    console.error('Error rejecting proposal:', error)
+  } catch {
     toast.error('Xatolik yuz berdi. Qaytadan urinib ko\'ring')
   }
 }
 
 const chatWithDriver = (orderId) => {
   if (!orderId) {
-    console.error('Order ID is undefined')
+    toast.warning('Buyurtma topilmadi')
     return
   }
-  console.log('Chat with driver for order:', orderId)
   router.push(`/chat/${orderId}`)
 }
 const formatPrice = (price) => {

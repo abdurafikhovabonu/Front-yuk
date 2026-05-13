@@ -44,6 +44,7 @@ const props = defineProps({
 
 const emit = defineEmits(['view'])
 const router = useRouter()
+const toast = useToast()
 
 const statusText = computed(() => {
   const statuses = {
@@ -74,10 +75,9 @@ const formatPrice = (price) => {
 const viewOrder = () => {
   const orderId = props.order._id || props.order.id
   if (!orderId) {
-    console.error('Order ID is undefined', props.order)
+    toast.warning('Buyurtma topilmadi')
     return
   }
-  console.log('Viewing order:', orderId)
   router.push(`/orders/${orderId}`)
 }
 </script>

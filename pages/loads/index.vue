@@ -121,6 +121,7 @@
 <script setup>
 const { getOrders } = useApi()
 const router = useRouter()
+const toast = useToast()
 
 const loads = ref([])
 const loading = ref(true)
@@ -142,9 +143,8 @@ const loadLoads = async () => {
     loads.value = allOrders.filter(order => order.status === 'pending')
     // Eng oxirgi qo'shilgan birinchi bo'lishi uchun sort
     loads.value.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    console.log('Loads loaded:', loads.value)
-  } catch (error) {
-    console.error('Error loading loads:', error)
+  } catch {
+    toast.error('Yuklarni yuklashda xatolik')
   } finally {
     loading.value = false
   }
@@ -152,16 +152,15 @@ const loadLoads = async () => {
 
 const goToProposal = (orderId) => {
   if (!orderId) {
-    console.error('Order ID is undefined')
+    toast.warning('Yuk topilmadi')
     return
   }
-  console.log('Going to proposal for order:', orderId)
   router.push(`/loads/${orderId}/propose`)
 }
 
 const viewLoadDetails = (orderId) => {
   if (!orderId) {
-    console.error('Order ID is undefined')
+    toast.warning('Yuk topilmadi')
     return
   }
   router.push(`/orders/${orderId}`)

@@ -105,6 +105,7 @@
 <script setup>
 const route = useRoute()
 const { getOrder, sendMessage: sendMessageApi } = useApi()
+const toast = useToast()
 
 /** API dan kelgan userId (string yoki obyekt) bilan joriy foydalanuvchini solishtirish */
 const normalizeUserId = (val) => {
@@ -138,8 +139,7 @@ onMounted(async () => {
   }
   
   const orderId = route.params.id
-  console.log('Chat page - Order ID:', orderId)
-  
+
   if (!orderId || orderId === 'undefined') {
     error.value = 'Buyurtma ID si topilmadi'
     loading.value = false
@@ -153,10 +153,8 @@ const loadChat = async (orderId) => {
   loading.value = true
   error.value = null
   try {
-    console.log('Loading chat for order:', orderId)
     const orderData = await getOrder(orderId)
-    console.log('Order data:', orderData)
-    
+
     if (!orderData || !orderData._id) {
       throw new Error('Buyurtma ma\'lumotlari topilmadi')
     }
@@ -171,7 +169,6 @@ const loadChat = async (orderId) => {
       }
     }, 100)
   } catch (err) {
-    console.error('Error loading chat:', err)
     error.value = err.message || 'Xabarlarni yuklashda xatolik'
   } finally {
     loading.value = false
@@ -181,22 +178,17 @@ const loadChat = async (orderId) => {
 const sendMessage = async () => {
   if (!newMessage.value.trim()) return
   if (!order.value || !order.value._id) {
-    alert('Buyurtma ma\'lumotlari topilmadi')
+    toast.error('Buyurtma ma\'lumotlari topilmadi')
     return
   }
-  
+
   sending.value = true
   try {
-    const orderId = order.value._id
-    console.log('Sending message to order:', orderId)
-    console.log('Message:', newMessage.value)
-    
     await sendMessageApi(String(order.value._id), newMessage.value)
     newMessage.value = ''
     await loadChat(String(order.value._id))
   } catch (err) {
-    console.error('Error sending message:', err)
-    alert('Xabarni yuborishda xatolik: ' + (err.message || 'Noma\'lum xato'))
+    toast.error('Xabarni yuborishda xatolik: ' + (err.message || 'Noma\'lum xato'))
   } finally {
     sending.value = false
   }

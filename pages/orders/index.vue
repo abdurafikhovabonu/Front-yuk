@@ -85,6 +85,7 @@
 <script setup>
 const { getOrders, updateOrder } = useApi()
 const router = useRouter()
+const toast = useToast()
 
 const orders = ref([])
 const loading = ref(true)
@@ -97,10 +98,9 @@ const loadOrders = async () => {
   loading.value = true
   try {
     const allOrders = await getOrders()
-    console.log('All orders:', allOrders)
     orders.value = allOrders
-  } catch (error) {
-    console.error('Error loading orders:', error)
+  } catch {
+    toast.error('Buyurtmalarni yuklashda xatolik')
   } finally {
     loading.value = false
   }
@@ -108,10 +108,9 @@ const loadOrders = async () => {
 
 const viewOrder = (orderId) => {
   if (!orderId) {
-    console.error('Order ID is undefined')
+    toast.warning('Buyurtma topilmadi')
     return
   }
-  console.log('Viewing order:', orderId)
   router.push(`/orders/${orderId}`)
 }
 
@@ -120,10 +119,9 @@ const cancelOrder = async (orderId) => {
     try {
       await updateOrder(orderId, { status: 'cancelled' })
       await loadOrders()
-      alert('Buyurtma bekor qilindi')
-    } catch (error) {
-      console.error('Error cancelling order:', error)
-      alert('Xatolik yuz berdi')
+      toast.success('Buyurtma bekor qilindi')
+    } catch {
+      toast.error('Xatolik yuz berdi')
     }
   }
 }

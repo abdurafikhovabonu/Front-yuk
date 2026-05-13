@@ -342,8 +342,7 @@ const handleSubmit = async () => {
     }, 1500)
     
   } catch (error) {
-    console.error('Error creating order:', error)
-    toast.error('Xatolik yuz berdi: ' + error.message)
+    toast.error('Xatolik yuz berdi: ' + (error?.message || ''))
   } finally {
     loading.value = false
   }

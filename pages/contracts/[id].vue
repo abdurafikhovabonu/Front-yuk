@@ -118,6 +118,7 @@
 const route = useRoute()
 const router = useRouter()
 const { getOrder, assignDriver } = useApi()
+const toast = useToast()
 
 const contract = ref({})
 const newMessage = ref('')
@@ -137,8 +138,8 @@ const loadContract = async () => {
     contract.value.from = order.from
     contract.value.to = order.to
     contract.value.price = order.price
-  } catch (error) {
-    console.error('Error loading contract:', error)
+  } catch {
+    toast.error('Shartnomani yuklashda xatolik')
   }
 }
 
@@ -149,8 +150,8 @@ const sendMessage = async () => {
     newMessage.value = ''
     await loadContract()
     scrollToBottom()
-  } catch (error) {
-    console.error('Error sending message:', error)
+  } catch {
+    toast.error('Xabarni yuborishda xatolik')
   } finally {
     sending.value = false
   }
@@ -161,8 +162,8 @@ const acceptContract = async () => {
     try {
       await assignDriver(route.params.id, { accept: true })
       router.push('/orders')
-    } catch (error) {
-      console.error('Error accepting contract:', error)
+    } catch {
+      toast.error('Taklifni qabul qilishda xatolik')
     }
   }
 }

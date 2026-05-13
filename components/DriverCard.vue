@@ -51,11 +51,15 @@ const props = defineProps({
   }
 })
 
+const toast = useToast()
+
 const formatPrice = (price) => {
   return new Intl.NumberFormat('uz-UZ').format(price)
 }
 
 const contactDriver = () => {
-  alert(`📞 Tel: ${props.driver.phone}\n📧 Email: ${props.driver.email}`)
+  const phone = props.driver.phone || '—'
+  const email = props.driver.email || '—'
+  toast.info(`📞 ${phone} · 📧 ${email}`)
 }
 </script>

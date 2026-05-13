@@ -113,6 +113,7 @@
 const route = useRoute()
 const router = useRouter()
 const { getOrder, createContract } = useApi()
+const toast = useToast()
 
 const loadData = ref(null)
 const loading = ref(true)
@@ -126,8 +127,7 @@ const proposal = ref({
 
 onMounted(async () => {
   const orderId = route.params.id
-  console.log('Order ID from route:', orderId)
-  
+
   if (!orderId || orderId === 'undefined') {
     error.value = 'Yuk ID si topilmadi'
     loading.value = false
@@ -141,10 +141,8 @@ const loadOrder = async (orderId) => {
   loading.value = true
   error.value = null
   try {
-    console.log('Loading order with ID:', orderId)
     const order = await getOrder(orderId)
-    console.log('Order loaded:', order)
-    
+
     if (!order || !order._id) {
       throw new Error('Yuk ma\'lumotlari topilmadi')
     }
@@ -152,7 +150,6 @@ const loadOrder = async (orderId) => {
     loadData.value = order
     proposal.value.price = order.price || 0
   } catch (err) {
-    console.error('Error loading order:', err)
     error.value = err.message || 'Yuk ma\'lumotlarini yuklashda xatolik'
   } finally {
     loading.value = false
@@ -161,26 +158,24 @@ const loadOrder = async (orderId) => {
 
 const submitProposal = async () => {
   if (!proposal.value.price || !proposal.value.deliveryDate) {
-    alert('Iltimos, barcha majburiy maydonlarni to\'ldiring!')
+    toast.warning('Iltimos, barcha majburiy maydonlarni to\'ldiring!')
     return
   }
   
   submitting.value = true
   try {
     const orderId = route.params.id
-    console.log('Submitting proposal for order:', orderId)
-    
+
     await createContract(orderId, {
       price: parseInt(proposal.value.price),
       deliveryDate: proposal.value.deliveryDate,
       terms: proposal.value.terms || ''
     })
     
-    alert('✅ Taklif muvaffaqiyatli yuborildi!')
+    toast.success('Taklif muvaffaqiyatli yuborildi!')
     router.push('/my-proposals')
   } catch (err) {
-    console.error('Error submitting proposal:', err)
-    alert('Xatolik yuz berdi: ' + (err.message || 'Noma\'lum xato'))
+    toast.error('Xatolik yuz berdi: ' + (err.message || 'Noma\'lum xato'))
   } finally {
     submitting.value = false
   }

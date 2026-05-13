@@ -108,6 +108,7 @@
 const route = useRoute()
 const router = useRouter()
 const { getOrder } = useApi()
+const toast = useToast()
 
 const order = ref({})
 const loading = ref(true)
@@ -115,8 +116,7 @@ const error = ref(null)
 
 onMounted(async () => {
   const orderId = route.params.id
-  console.log('Order ID from route:', orderId)
-  
+
   if (!orderId || orderId === 'undefined') {
     error.value = 'Buyurtma ID si topilmadi'
     loading.value = false
@@ -130,17 +130,14 @@ const loadOrder = async (orderId) => {
   loading.value = true
   error.value = null
   try {
-    console.log('Loading order with ID:', orderId)
     const orderData = await getOrder(orderId)
-    console.log('Order data received:', orderData)
-    
+
     if (!orderData || !orderData._id) {
       throw new Error('Buyurtma ma\'lumotlari topilmadi')
     }
     
     order.value = orderData
   } catch (err) {
-    console.error('Error loading order:', err)
     error.value = err.message || 'Buyurtma ma\'lumotlarini yuklashda xatolik'
   } finally {
     loading.value = false
@@ -149,9 +146,9 @@ const loadOrder = async (orderId) => {
 
 const contactDriver = () => {
   if (order.value.driver?.phone) {
-    alert(`📞 Haydovchi telefoni: ${order.value.driver.phone}`)
+    toast.info(`📞 Haydovchi telefoni: ${order.value.driver.phone}`)
   } else {
-    alert('Haydovchi telefon raqami mavjud emas')
+    toast.warning('Haydovchi telefon raqami mavjud emas')
   }
 }
 
