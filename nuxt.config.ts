@@ -93,15 +93,20 @@ export default defineNuxtConfig({
   
   devtools: { enabled: true },
   
-  // Vercel uchun muhim sozlamalar
+  // Vercel uchun muhim - SPA mode
   nitro: {
-    preset: 'vercel-edge',  // vercel preset
+    preset: 'vercel-edge',
     output: {
       dir: 'dist'
     },
     compressPublicAssets: true,
-    minify: true
+    minify: true,
+    serveStatic: true
   },
+  
+  // Static generation
+  ssr: true,
+  target: 'static',
   
   app: {
     head: {
@@ -113,6 +118,20 @@ export default defineNuxtConfig({
     }
   },
   
-  sourcemap: false,
-  ssr: true
+  generate: {
+    fallback: true,
+    routes: [
+      '/',
+      '/login',
+      '/register',
+      '/orders',
+      '/loads',
+      '/drivers',
+      '/profile',
+      '/my-proposals',
+      '/incoming-proposals'
+    ]
+  },
+  
+  sourcemap: false
 })
