@@ -57,11 +57,11 @@
         <div 
           v-for="msg in messages" 
           :key="msg.id || msg._id"
-          :class="msg.userId === currentUserId ? 'justify-end' : 'justify-start'"
+          :class="sameUser(msg.userId, currentUserId) ? 'justify-end' : 'justify-start'"
           class="flex"
         >
           <div 
-            :class="msg.userId === currentUserId 
+            :class="sameUser(msg.userId, currentUserId) 
               ? 'bg-blue-600 text-white' 
               : 'bg-gray-100 text-gray-800'"
             class="max-w-[75%] rounded-2xl px-4 py-2 shadow-sm"
@@ -104,8 +104,16 @@
 
 <script setup>
 const route = useRoute()
-const router = useRouter()
 const { getOrder, sendMessage: sendMessageApi } = useApi()
+
+/** API dan kelgan userId (string yoki obyekt) bilan joriy foydalanuvchini solishtirish */
+const normalizeUserId = (val) => {
+  if (val == null || val === '') return ''
+  if (typeof val === 'object' && val._id != null) return String(val._id)
+  return String(val)
+}
+
+const sameUser = (a, b) => normalizeUserId(a) === normalizeUserId(b)
 
 const order = ref(null)
 const messages = ref([])
@@ -126,7 +134,7 @@ onMounted(async () => {
   const user = localStorage.getItem('user')
   if (user) {
     const userData = JSON.parse(user)
-    currentUserId.value = userData.id || userData._id
+    currentUserId.value = normalizeUserId(userData.id ?? userData._id)
   }
   
   const orderId = route.params.id
@@ -183,9 +191,9 @@ const sendMessage = async () => {
     console.log('Sending message to order:', orderId)
     console.log('Message:', newMessage.value)
     
-    await sendMessageApi(orderId, newMessage.value)
+    await sendMessageApi(String(order.value._id), newMessage.value)
     newMessage.value = ''
-    await loadChat(orderId)
+    await loadChat(String(order.value._id))
   } catch (err) {
     console.error('Error sending message:', err)
     alert('Xabarni yuborishda xatolik: ' + (err.message || 'Noma\'lum xato'))

@@ -2,17 +2,6 @@
   <div>
     <h1 class="text-3xl font-bold mb-8">Mening takliflarim</h1>
     
-    <!-- Debug panel -->
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-      <p class="font-semibold text-yellow-800">🔍 Debug ma'lumotlari:</p>
-      <p class="text-sm text-yellow-700">Takliflar soni: {{ proposals.length }}</p>
-      <p class="text-sm text-yellow-700">Foydalanuvchi ID: {{ currentUser?.id || currentUser?._id }}</p>
-      <p class="text-sm text-yellow-700">Foydalanuvchi roli: {{ currentUser?.role }}</p>
-      <button @click="checkAPI" class="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm">
-        API ni tekshirish
-      </button>
-    </div>
-    
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       <p class="mt-2 text-gray-500">Takliflar yuklanmoqda...</p>
@@ -31,7 +20,7 @@
     <div v-else class="space-y-6">
       <div 
         v-for="proposal in proposals" 
-        :key="proposal._id"
+        :key="orderId(proposal)"
         class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition"
       >
         <div class="p-6">
@@ -92,8 +81,8 @@
                 Hozircha xabarlar yo'q
               </div>
               <div 
-                v-for="msg in getMessages(proposal)" 
-                :key="msg.id"
+                v-for="(msg, idx) in getMessages(proposal)" 
+                :key="messageKey(msg, idx)"
                 :class="msg.userRole === 'driver' ? 'justify-end' : 'justify-start'"
                 class="flex mb-3"
               >
@@ -110,16 +99,16 @@
               </div>
             </div>
             
-            <form @submit.prevent="sendMessage(proposal._id)" class="mt-3 flex space-x-2">
+            <form @submit.prevent="sendMessage(orderId(proposal))" class="mt-3 flex space-x-2">
               <input 
-                v-model="newMessages[proposal._id]" 
+                v-model="newMessages[orderId(proposal)]" 
                 type="text" 
                 placeholder="Xabar yozing..."
                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
               />
               <button 
                 type="submit" 
-                :disabled="sending[proposal._id]"
+                :disabled="sending[orderId(proposal)]"
                 class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
                 Yuborish
@@ -131,14 +120,14 @@
           <div class="flex space-x-3 mt-4 pt-4 border-t">
             <button 
               v-if="proposal.status === 'accepted'"
-              @click="viewOrder(proposal._id)"
+              @click="viewOrder(orderId(proposal))"
               class="flex-1 px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50"
             >
               📦 Buyurtmani ko'rish
             </button>
             <button 
               v-if="proposal.status === 'pending' || proposal.status === 'negotiation'"
-              @click="cancelProposal(proposal._id)"
+              @click="cancelProposal(orderId(proposal))"
               class="flex-1 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50"
             >
               ❌ Taklifni bekor qilish
@@ -151,73 +140,38 @@
 </template>
 
 <script setup>
-const { getOrders, sendMessage: sendMessageApi, updateOrder } = useApi()
+const { getMyProposals, sendMessage: sendMessageApi, updateOrder } = useApi()
 const router = useRouter()
+
+const orderId = (order) => {
+  if (!order) return ''
+  const raw = order._id ?? order.id
+  return raw != null ? String(raw) : ''
+}
+
+const messageKey = (msg, idx) => {
+  if (msg._id) return String(msg._id)
+  if (msg.id) return String(msg.id)
+  return `m-${idx}-${msg.timestamp || ''}`
+}
 
 const proposals = ref([])
 const loading = ref(true)
-const currentUser = ref(null)
 const newMessages = ref({})
 const sending = ref({})
-const startChat = (orderId) => {
-  if (!orderId) {
-    console.error('Order ID is undefined')
-    return
-  }
-  console.log('Starting chat for order:', orderId)
-  router.push(`/chat/${orderId}`)
-}
+
 onMounted(() => {
-  const userData = localStorage.getItem('user')
-  if (userData) {
-    currentUser.value = JSON.parse(userData)
-    console.log('Current user:', currentUser.value)
-  }
   loadMyProposals()
 })
-
-const checkAPI = async () => {
-  const { getOrders } = useApi()
-  try {
-    const allOrders = await getOrders()
-    console.log('All orders:', allOrders)
-    
-    // Haydovchini takliflarini filter qilish
-    const myProposals = allOrders.filter(order => 
-      order.driverId === currentUser.value?.id || 
-      order.driverId === currentUser.value?._id ||
-      (order.contract && order.contract.driverId === currentUser.value?.id)
-    )
-    console.log('My proposals filtered:', myProposals)
-    alert(`API dan ${allOrders.length} ta order keldi, ulardan ${myProposals.length} tasi sizniki`)
-  } catch (error) {
-    console.error('API check error:', error)
-  }
-}
 
 const loadMyProposals = async () => {
   loading.value = true
   try {
-    const allOrders = await getOrders()
-    console.log('All orders:', allOrders)
-    
-    // Haydovchining ID sini tekshirish
-    const driverId = currentUser.value?.id || currentUser.value?._id
-    console.log('Driver ID:', driverId)
-    
-    // Haydovchining takliflari
-    proposals.value = allOrders.filter(order => {
-      // To'g'ridan-to'g'ri driverId
-      if (order.driverId === driverId) return true
-      // Contract ichida driverId
-      if (order.contract && order.contract.driverId === driverId) return true
-      return false
-    })
-    
-    console.log('My proposals count:', proposals.value.length)
-    console.log('My proposals:', proposals.value)
+    proposals.value = await getMyProposals()
   } catch (error) {
     console.error('Error loading proposals:', error)
+    const toast = useToast()
+    toast.error('Takliflarni yuklashda xatolik')
   } finally {
     loading.value = false
   }

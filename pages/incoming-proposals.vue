@@ -16,7 +16,7 @@
     <div v-else class="space-y-6">
       <div 
         v-for="proposal in proposals" 
-        :key="proposal.id" 
+        :key="orderId(proposal)" 
         class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
       >
         <div class="p-6">
@@ -65,19 +65,19 @@
           
           <div class="flex space-x-3">
             <button 
-              @click="openAcceptModal(proposal.id)"
+              @click="openAcceptModal(orderId(proposal))"
               class="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105"
             >
               ✅ Taklifni qabul qilish
             </button>
             <button 
-              @click="openRejectModal(proposal.id)"
+              @click="openRejectModal(orderId(proposal))"
               class="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition"
             >
               ❌ Rad etish
             </button>
             <button 
-              @click="chatWithDriver(proposal.id)"
+              @click="chatWithDriver(orderId(proposal))"
               class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition"
             >
               💬 Muzokara
@@ -164,6 +164,13 @@
 <script setup>
 const { getOrders, acceptContract, updateOrder } = useApi()
 const router = useRouter()
+
+/** API Mongo buyurtma ID si (_id), id maydoni bo‘lmasligi mumkin */
+const orderId = (order) => {
+  if (!order) return ''
+  const raw = order._id ?? order.id
+  return raw != null ? String(raw) : ''
+}
 
 const proposals = ref([])
 const loading = ref(true)

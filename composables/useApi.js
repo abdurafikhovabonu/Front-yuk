@@ -51,6 +51,14 @@ export const useApi = () => {
       })
       return handleResponse(response)
     },
+
+    /** Haydovchining barcha takliflari (pending + muzokara va h.k.) */
+    async getMyProposals() {
+      const response = await fetch(`${baseURL}/orders/my-proposals`, {
+        headers: getHeaders()
+      })
+      return handleResponse(response)
+    },
     
  async getOrder(id) {
   console.log('API getOrder called with id:', id)
