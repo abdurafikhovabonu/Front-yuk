@@ -1,8 +1,9 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+  
   modules: ['@nuxtjs/i18n'],
+  
   i18n: {
-    /** Til fayllari `frontend/locales/` da (default `i18n/locales` emas) */
     restructureDir: '.',
     locales: [
       { code: 'uz', language: 'uz-Latn-UZ', name: "O'zbekcha", file: 'uz.json' },
@@ -20,14 +21,17 @@ export default defineNuxtConfig({
       alwaysRedirect: false
     }
   },
-  css: ['../assets/css/tailwind.css'],
+  
+  css: ['~/assets/css/tailwind.css'],  // ~/ assets ga ishora qiladi
+  
   postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
   },
-    vite: {
+  
+  vite: {
     optimizeDeps: {
       include: [
         '@vue/devtools-core',
@@ -35,10 +39,20 @@ export default defineNuxtConfig({
       ]
     }
   },
+  
   devtools: { enabled: true },
+  
+  // Netlify uchun muhim sozlamalar
   nitro: {
-    preset: 'node-server'
+    preset: 'netlify',  // netlify preset - muhim!
+    output: {
+      dir: 'dist',      // Netlify default publish papkasi
+      serverDir: '.netlify/functions-internal'
+    },
+    compressPublicAssets: true,
+    minify: true
   },
+  
   app: {
     head: {
       title: 'Yukchi uz',
@@ -47,5 +61,11 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' }
       ]
     }
-  }
+  },
+  
+  // Netlify deploy tezligi uchun
+  sourcemap: false,
+  
+  // Static generation (SEO uchun)
+  ssr: true
 })
