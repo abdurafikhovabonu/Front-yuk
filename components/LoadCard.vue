@@ -65,21 +65,29 @@
 </template>
 
 <script setup>
-defineProps({
+
+const props = defineProps({
   load: {
     type: Object,
     required: true
   }
 })
 
-defineEmits(['propose', 'view'])
+const emit = defineEmits(['propose', 'view'])
 
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('uz-UZ').format(price)
+const makeProposal = () => {
+  if (!props.load._id) {
+    console.error('Load ID is undefined')
+    return
+  }
+  emit('propose', props.load._id)
 }
 
-const formatDate = (date) => {
-  if (!date) return 'Noma\'lum'
-  return new Date(date).toLocaleDateString('uz-UZ')
+const viewDetails = () => {
+  if (!props.load._id) {
+    console.error('Load ID is undefined')
+    return
+  }
+  emit('view', props.load._id)
 }
 </script>

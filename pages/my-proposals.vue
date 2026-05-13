@@ -2,9 +2,20 @@
   <div>
     <h1 class="text-3xl font-bold mb-8">Mening takliflarim</h1>
     
+    <!-- Debug panel -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+      <p class="font-semibold text-yellow-800">🔍 Debug ma'lumotlari:</p>
+      <p class="text-sm text-yellow-700">Takliflar soni: {{ proposals.length }}</p>
+      <p class="text-sm text-yellow-700">Foydalanuvchi ID: {{ currentUser?.id || currentUser?._id }}</p>
+      <p class="text-sm text-yellow-700">Foydalanuvchi roli: {{ currentUser?.role }}</p>
+      <button @click="checkAPI" class="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm">
+        API ni tekshirish
+      </button>
+    </div>
+    
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-500">Yuklanmoqda...</p>
+      <p class="mt-2 text-gray-500">Takliflar yuklanmoqda...</p>
     </div>
     
     <div v-else-if="proposals.length === 0" class="text-center py-12 bg-white rounded-2xl shadow-md">
@@ -20,17 +31,18 @@
     <div v-else class="space-y-6">
       <div 
         v-for="proposal in proposals" 
-        :key="proposal.id" 
-        class="bg-white rounded-2xl shadow-md overflow-hidden"
+        :key="proposal._id"
+        class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition"
       >
         <div class="p-6">
+          <!-- Header -->
           <div class="flex justify-between items-start mb-4">
             <div>
               <div class="flex items-center space-x-2 mb-2">
                 <span class="text-xs font-semibold bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                  Taklif #{{ proposal.id }}
+                  Taklif
                 </span>
-                <span class="text-xs text-gray-500">{{ formatDate(proposal.createdAt) }}</span>
+                <span class="text-xs text-gray-500">{{ formatRelativeTime(proposal.createdAt) }}</span>
               </div>
               <h3 class="text-xl font-bold text-gray-800">
                 {{ proposal.from }} → {{ proposal.to }}
@@ -41,39 +53,42 @@
             </span>
           </div>
           
+          <!-- Info Grid -->
           <div class="grid md:grid-cols-2 gap-4 mb-4">
             <div>
-              <p class="text-gray-500 text-sm">Mijoz</p>
+              <p class="text-gray-500 text-sm">👤 Mijoz</p>
               <p class="font-semibold">{{ proposal.client?.name || 'Mijoz' }}</p>
-              <p class="text-sm text-gray-600">Tel: {{ proposal.client?.phone || 'Noma\'lum' }}</p>
+              <p class="text-sm text-gray-600">📞 Tel: {{ proposal.client?.phone || 'Noma\'lum' }}</p>
             </div>
             <div>
-              <p class="text-gray-500 text-sm">Sizning taklifingiz</p>
+              <p class="text-gray-500 text-sm">💰 Sizning taklifingiz</p>
               <p class="font-bold text-2xl text-blue-600">{{ formatPrice(proposal.contract?.price || proposal.price) }} so'm</p>
             </div>
             <div>
-              <p class="text-gray-500 text-sm">Yetkazib berish muddati</p>
+              <p class="text-gray-500 text-sm">📅 Yetkazib berish muddati</p>
               <p class="font-semibold">{{ formatDate(proposal.contract?.deliveryDate) }}</p>
             </div>
             <div>
-              <p class="text-gray-500 text-sm">Yuk ma'lumotlari</p>
+              <p class="text-gray-500 text-sm">📦 Yuk ma'lumotlari</p>
               <p class="text-sm">{{ proposal.cargo }} ({{ proposal.weight }})</p>
             </div>
+          </div>
+          
+          <!-- Terms -->
+          <div v-if="proposal.contract?.terms" class="bg-gray-50 rounded-lg p-3 mb-4">
+            <p class="text-gray-500 text-sm mb-1">📝 Shartnoma shartlari:</p>
+            <p class="text-sm">{{ proposal.contract.terms }}</p>
           </div>
           
           <!-- Chat Section -->
           <div class="border-t pt-4 mt-4">
             <div class="flex justify-between items-center mb-3">
-              <h4 class="font-semibold text-gray-800">Muzokaralar</h4>
-              <span class="text-xs text-gray-500">{{ getMessageCount(proposal) }} ta xabar</span>
+              <h4 class="font-semibold text-gray-800">💬 Muzokaralar</h4>
+              <span class="text-xs text-gray-500">{{ getMessages(proposal).length }} ta xabar</span>
             </div>
             
-            <!-- Messages -->
             <div class="bg-gray-50 rounded-lg p-3 max-h-64 overflow-y-auto">
               <div v-if="getMessages(proposal).length === 0" class="text-center py-8 text-gray-500 text-sm">
-                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                </svg>
                 Hozircha xabarlar yo'q
               </div>
               <div 
@@ -95,22 +110,19 @@
               </div>
             </div>
             
-            <!-- Message Input -->
-            <form @submit.prevent="sendMessage(proposal.id)" class="mt-3 flex space-x-2">
+            <form @submit.prevent="sendMessage(proposal._id)" class="mt-3 flex space-x-2">
               <input 
-                v-model="newMessages[proposal.id]" 
+                v-model="newMessages[proposal._id]" 
                 type="text" 
-                :placeholder="`${proposal.client?.name || 'Mijoz'} ga xabar yozing...`"
-                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Xabar yozing..."
+                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
               />
               <button 
                 type="submit" 
-                :disabled="sending[proposal.id]"
-                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                :disabled="sending[proposal._id]"
+                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                </svg>
+                Yuborish
               </button>
             </form>
           </div>
@@ -119,17 +131,17 @@
           <div class="flex space-x-3 mt-4 pt-4 border-t">
             <button 
               v-if="proposal.status === 'accepted'"
-              @click="viewOrder(proposal.id)"
-              class="flex-1 px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition"
+              @click="viewOrder(proposal._id)"
+              class="flex-1 px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50"
             >
-              Buyurtmani ko'rish
+              📦 Buyurtmani ko'rish
             </button>
             <button 
               v-if="proposal.status === 'pending' || proposal.status === 'negotiation'"
-              @click="cancelProposal(proposal.id)"
-              class="flex-1 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition"
+              @click="cancelProposal(proposal._id)"
+              class="flex-1 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50"
             >
-              Taklifni bekor qilish
+              ❌ Taklifni bekor qilish
             </button>
           </div>
         </div>
@@ -147,22 +159,40 @@ const loading = ref(true)
 const currentUser = ref(null)
 const newMessages = ref({})
 const sending = ref({})
-
+const startChat = (orderId) => {
+  if (!orderId) {
+    console.error('Order ID is undefined')
+    return
+  }
+  console.log('Starting chat for order:', orderId)
+  router.push(`/chat/${orderId}`)
+}
 onMounted(() => {
   const userData = localStorage.getItem('user')
   if (userData) {
     currentUser.value = JSON.parse(userData)
+    console.log('Current user:', currentUser.value)
   }
   loadMyProposals()
 })
 
-// Xabarlarni olish uchun yordamchi funksiyalar
-const getMessages = (proposal) => {
-  return proposal.contract?.messages || []
-}
-
-const getMessageCount = (proposal) => {
-  return proposal.contract?.messages?.length || 0
+const checkAPI = async () => {
+  const { getOrders } = useApi()
+  try {
+    const allOrders = await getOrders()
+    console.log('All orders:', allOrders)
+    
+    // Haydovchini takliflarini filter qilish
+    const myProposals = allOrders.filter(order => 
+      order.driverId === currentUser.value?.id || 
+      order.driverId === currentUser.value?._id ||
+      (order.contract && order.contract.driverId === currentUser.value?.id)
+    )
+    console.log('My proposals filtered:', myProposals)
+    alert(`API dan ${allOrders.length} ta order keldi, ulardan ${myProposals.length} tasi sizniki`)
+  } catch (error) {
+    console.error('API check error:', error)
+  }
 }
 
 const loadMyProposals = async () => {
@@ -171,42 +201,44 @@ const loadMyProposals = async () => {
     const allOrders = await getOrders()
     console.log('All orders:', allOrders)
     
-    // Haydovchining o'z takliflari
+    // Haydovchining ID sini tekshirish
+    const driverId = currentUser.value?.id || currentUser.value?._id
+    console.log('Driver ID:', driverId)
+    
+    // Haydovchining takliflari
     proposals.value = allOrders.filter(order => {
-      // Agar contract mavjud va driverId mos kelsa
-      if (order.contract && order.contract.driverId === currentUser.value?.id) {
-        return true
-      }
-      // Yoki status negotiation va driverId mos kelsa
-      if (order.status === 'negotiation' && order.driverId === currentUser.value?.id) {
-        return true
-      }
+      // To'g'ridan-to'g'ri driverId
+      if (order.driverId === driverId) return true
+      // Contract ichida driverId
+      if (order.contract && order.contract.driverId === driverId) return true
       return false
     })
     
+    console.log('My proposals count:', proposals.value.length)
     console.log('My proposals:', proposals.value)
   } catch (error) {
     console.error('Error loading proposals:', error)
-    alert('Xatolik yuz berdi: ' + error.message)
   } finally {
     loading.value = false
   }
 }
 
+const getMessages = (proposal) => {
+  return proposal.contract?.messages || []
+}
+
 const sendMessage = async (orderId) => {
   const message = newMessages.value[orderId]
-  if (!message || !message.trim()) return
+  if (!message?.trim()) return
   
   sending.value[orderId] = true
-  
   try {
-    console.log('Sending message to order:', orderId, message)
     await sendMessageApi(orderId, message)
     newMessages.value[orderId] = ''
-    await loadMyProposals() // Yangilash
+    await loadMyProposals()
   } catch (error) {
     console.error('Error sending message:', error)
-    alert('Xabarni yuborishda xatolik: ' + (error.message || 'Noma\'lum xato'))
+    alert('Xabarni yuborishda xatolik')
   } finally {
     sending.value[orderId] = false
   }
@@ -215,16 +247,12 @@ const sendMessage = async (orderId) => {
 const cancelProposal = async (orderId) => {
   if (confirm('Taklifni bekor qilmoqchimisiz?')) {
     try {
-      await updateOrder(orderId, { 
-        status: 'pending', 
-        contract: null,
-        driverId: null
-      })
+      await updateOrder(orderId, { status: 'pending', contract: null, driverId: null })
       await loadMyProposals()
       alert('Taklif bekor qilindi')
     } catch (error) {
       console.error('Error canceling proposal:', error)
-      alert('Xatolik yuz berdi: ' + error.message)
+      alert('Xatolik yuz berdi')
     }
   }
 }
@@ -238,19 +266,19 @@ const getStatusClass = (status) => {
     pending: 'bg-yellow-100 text-yellow-800',
     negotiation: 'bg-purple-100 text-purple-800',
     accepted: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-    completed: 'bg-blue-100 text-blue-800'
+    completed: 'bg-blue-100 text-blue-800',
+    cancelled: 'bg-red-100 text-red-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
 const getStatusText = (status) => {
   const texts = {
-    pending: 'Kutilmoqda',
-    negotiation: 'Muzokarada',
-    accepted: 'Qabul qilingan',
-    rejected: 'Rad etilgan',
-    completed: 'Bajarilgan'
+    pending: '⏳ Kutilmoqda',
+    negotiation: '💬 Muzokarada',
+    accepted: '✅ Qabul qilingan',
+    completed: '🎉 Bajarilgan',
+    cancelled: '❌ Bekor qilingan'
   }
   return texts[status] || status
 }
@@ -262,22 +290,30 @@ const formatPrice = (price) => {
 
 const formatDate = (date) => {
   if (!date) return 'Noma\'lum'
-  try {
-    return new Date(date).toLocaleDateString('uz-UZ')
-  } catch (e) {
-    return 'Noma\'lum'
-  }
+  return new Date(date).toLocaleDateString('uz-UZ')
+}
+
+const formatRelativeTime = (date) => {
+  if (!date) return 'Noma\'lum'
+  const now = new Date()
+  const created = new Date(date)
+  const diffMs = now - created
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+  
+  if (diffMins < 1) return 'Hozirgina'
+  if (diffMins < 60) return `${diffMins} daqiqa oldin`
+  if (diffHours < 24) return `${diffHours} soat oldin`
+  if (diffDays === 1) return 'Kecha'
+  return `${diffDays} kun oldin`
 }
 
 const formatTime = (time) => {
   if (!time) return ''
-  try {
-    return new Date(time).toLocaleTimeString('uz-UZ', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  } catch (e) {
-    return ''
-  }
+  return new Date(time).toLocaleTimeString('uz-UZ', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 </script>

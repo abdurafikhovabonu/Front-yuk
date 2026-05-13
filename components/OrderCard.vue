@@ -32,7 +32,10 @@
 
 <script setup>
 const props = defineProps({
-  order: Object,
+  order: {
+    type: Object,
+    required: true
+  },
   showActions: {
     type: Boolean,
     default: true
@@ -69,6 +72,12 @@ const formatPrice = (price) => {
 }
 
 const viewOrder = () => {
-  router.push(`/orders/${props.order.id}`)
+  const orderId = props.order._id || props.order.id
+  if (!orderId) {
+    console.error('Order ID is undefined', props.order)
+    return
+  }
+  console.log('Viewing order:', orderId)
+  router.push(`/orders/${orderId}`)
 }
 </script>

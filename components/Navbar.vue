@@ -198,7 +198,8 @@ const menuItems = computed(() => {
       { name: 'Admin Panel', path: '/admin' },
       { name: 'Foydalanuvchilar', path: '/admin/users' },
       { name: 'Buyurtmalar', path: '/admin/orders' },
-      { name: 'Haydovchilar', path: '/admin/drivers' }
+      { name: 'Haydovchilar', path: '/admin/drivers' },
+      
     ]
   }
   
@@ -208,14 +209,16 @@ const menuItems = computed(() => {
       { name: 'Elon berish', path: '/create-order' },
       { name: 'Buyurtmalar', path: '/orders' },
       { name: 'Takliflar', path: '/incoming-proposals' },
-      { name: 'Haydovchilar', path: '/drivers' }
+      { name: 'Haydovchilar', path: '/drivers' },
+      { name: 'Yangiliklar', path: '/news' }
     ]
   } else if (user.value.role === 'driver') {
     return [
       ...commonItems,
       { name: 'Yuk elonlari', path: '/loads' },
       { name: 'Mening takliflarim', path: '/my-proposals' },
-      { name: 'Haydovchilar', path: '/drivers' }
+      { name: 'Haydovchilar', path: '/drivers' },
+      { name: 'Yangiliklar', path: '/news' }
     ]
   }
   

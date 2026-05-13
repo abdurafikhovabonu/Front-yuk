@@ -52,12 +52,16 @@ export const useApi = () => {
       return handleResponse(response)
     },
     
-    async getOrder(id) {
-      const response = await fetch(`${baseURL}/orders/${id}`, {
-        headers: getHeaders()
-      })
-      return handleResponse(response)
-    },
+ async getOrder(id) {
+  console.log('API getOrder called with id:', id)
+  if (!id || id === 'undefined') {
+    throw new Error('Invalid order ID')
+  }
+  const response = await fetch(`${baseURL}/orders/${id}`, {
+    headers: getHeaders()
+  })
+  return handleResponse(response)
+},
     
     async createOrder(data) {
       const response = await fetch(`${baseURL}/orders`, {
@@ -93,7 +97,23 @@ export const useApi = () => {
       })
       return handleResponse(response)
     },
-    
+    // ... boshqa metodlar
+
+async getNews() {
+  console.log('Fetching news from API...'); // Debug
+  const response = await fetch(`${baseURL}/news`, {
+    headers: getHeaders()
+  })
+  return handleResponse(response)
+},
+
+async getNewsBySlug(slug) {
+  console.log('Fetching news by slug:', slug); // Debug
+  const response = await fetch(`${baseURL}/news/${slug}`, {
+    headers: getHeaders()
+  })
+  return handleResponse(response)
+},
     // Yangi: Shartnoma yaratish (taklif berish)
     async createContract(orderId, data) {
       console.log('Calling createContract API:', orderId, data)
@@ -115,7 +135,8 @@ export const useApi = () => {
     },
     
     // Yangi: Xabar yuborish
-    async sendMessage(orderId, message) {
+async sendMessage(orderId, message) {
+  console.log('API sendMessage called:', orderId, message)
   const response = await fetch(`${baseURL}/orders/${orderId}/contract/message`, {
     method: 'POST',
     headers: getHeaders(),

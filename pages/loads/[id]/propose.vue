@@ -11,9 +11,16 @@
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
     
+    <div v-else-if="error" class="text-center py-12 bg-white rounded-2xl shadow-md">
+      <p class="text-red-500">{{ error }}</p>
+      <NuxtLink to="/loads" class="inline-block mt-4 text-blue-600">
+        Yuk elonlariga qaytish →
+      </NuxtLink>
+    </div>
+    
     <div v-else-if="!loadData" class="text-center py-12 bg-white rounded-2xl shadow-md">
       <p class="text-gray-500">Yuk ma'lumotlari topilmadi</p>
-      <NuxtLink to="/loads" class="inline-block mt-4 text-blue-600 hover:text-blue-800">
+      <NuxtLink to="/loads" class="inline-block mt-4 text-blue-600">
         Yuk elonlariga qaytish →
       </NuxtLink>
     </div>
@@ -21,7 +28,7 @@
     <div v-else>
       <!-- Yuk ma'lumotlari -->
       <div class="bg-blue-50 rounded-2xl p-6 mb-8">
-        <h2 class="text-lg font-semibold mb-2">Yuk ma'lumotlari</h2>
+        <h2 class="text-lg font-semibold mb-2">📦 Yuk ma'lumotlari</h2>
         <div class="grid md:grid-cols-2 gap-4">
           <div>
             <p class="text-gray-600">Yo'nalish:</p>
@@ -35,12 +42,16 @@
             <p class="text-gray-600">Mijoz taklifi:</p>
             <p class="font-semibold text-blue-600">{{ formatPrice(loadData.price) }} so'm</p>
           </div>
+          <div>
+            <p class="text-gray-600">Yaratilgan:</p>
+            <p class="font-semibold">{{ formatRelativeTime(loadData.createdAt) }}</p>
+          </div>
         </div>
       </div>
       
       <!-- Taklif formasi -->
       <div class="bg-white rounded-2xl shadow-md p-8">
-        <h2 class="text-xl font-bold mb-6">Sizning taklifingiz</h2>
+        <h2 class="text-xl font-bold mb-6">💎 Sizning taklifingiz</h2>
         
         <form @submit.prevent="submitProposal" class="space-y-6">
           <div>
@@ -52,7 +63,7 @@
               type="number" 
               required
               :placeholder="`Mijoz taklifi: ${formatPrice(loadData.price)} so'm`"
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -64,7 +75,7 @@
               v-model="proposal.deliveryDate" 
               type="date" 
               required
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -75,30 +86,19 @@
             <textarea 
               v-model="proposal.terms" 
               rows="4"
-              placeholder="Qo'shimcha shartlar: yukni yuklash/tushirish vaqti, maxsus talablar va boshqalar..."
-              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Qo'shimcha shartlar..."
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500"
             ></textarea>
           </div>
           
-          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div class="flex items-start">
-              <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <p class="text-sm text-yellow-800">
-                Taklifingiz mijozga yuboriladi. Mijoz taklifingizni qabul qilsa, siz bilan bog'lanadi va shartnoma tuziladi.
-              </p>
-            </div>
-          </div>
-          
           <div class="flex justify-end space-x-3">
-            <NuxtLink to="/loads" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+            <NuxtLink to="/loads" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
               Bekor qilish
             </NuxtLink>
             <button 
               type="submit" 
               :disabled="submitting"
-              class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg hover:shadow-lg transition disabled:opacity-50"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               {{ submitting ? 'Yuborilmoqda...' : 'Taklif yuborish' }}
             </button>
@@ -116,6 +116,7 @@ const { getOrder, createContract } = useApi()
 
 const loadData = ref(null)
 const loading = ref(true)
+const error = ref(null)
 const submitting = ref(false)
 const proposal = ref({
   price: '',
@@ -124,23 +125,35 @@ const proposal = ref({
 })
 
 onMounted(async () => {
-  await loadOrder()
+  const orderId = route.params.id
+  console.log('Order ID from route:', orderId)
+  
+  if (!orderId || orderId === 'undefined') {
+    error.value = 'Yuk ID si topilmadi'
+    loading.value = false
+    return
+  }
+  
+  await loadOrder(orderId)
 })
 
-const loadOrder = async () => {
+const loadOrder = async (orderId) => {
   loading.value = true
+  error.value = null
   try {
-    const orderId = route.params.id
-    console.log('Loading order ID:', orderId)
-    
+    console.log('Loading order with ID:', orderId)
     const order = await getOrder(orderId)
-    console.log('Order data:', order)
+    console.log('Order loaded:', order)
+    
+    if (!order || !order._id) {
+      throw new Error('Yuk ma\'lumotlari topilmadi')
+    }
     
     loadData.value = order
-    proposal.value.price = order.price
-  } catch (error) {
-    console.error('Error loading order:', error)
-    alert('Yuk ma\'lumotlarini yuklashda xatolik: ' + error.message)
+    proposal.value.price = order.price || 0
+  } catch (err) {
+    console.error('Error loading order:', err)
+    error.value = err.message || 'Yuk ma\'lumotlarini yuklashda xatolik'
   } finally {
     loading.value = false
   }
@@ -156,26 +169,41 @@ const submitProposal = async () => {
   try {
     const orderId = route.params.id
     console.log('Submitting proposal for order:', orderId)
-    console.log('Proposal data:', proposal.value)
     
-    // createContract API ni chaqiramiz
     await createContract(orderId, {
       price: parseInt(proposal.value.price),
       deliveryDate: proposal.value.deliveryDate,
-      terms: proposal.value.terms
+      terms: proposal.value.terms || ''
     })
     
-    alert('Taklif muvaffaqiyatli yuborildi!')
-    router.push('/loads')
-  } catch (error) {
-    console.error('Error submitting proposal:', error)
-    alert('Xatolik yuz berdi: ' + error.message)
+    alert('✅ Taklif muvaffaqiyatli yuborildi!')
+    router.push('/my-proposals')
+  } catch (err) {
+    console.error('Error submitting proposal:', err)
+    alert('Xatolik yuz berdi: ' + (err.message || 'Noma\'lum xato'))
   } finally {
     submitting.value = false
   }
 }
 
 const formatPrice = (price) => {
+  if (!price) return '0'
   return new Intl.NumberFormat('uz-UZ').format(price)
+}
+
+const formatRelativeTime = (date) => {
+  if (!date) return 'Noma\'lum'
+  const now = new Date()
+  const created = new Date(date)
+  const diffMs = now - created
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+  
+  if (diffMins < 1) return 'Hozirgina'
+  if (diffMins < 60) return `${diffMins} daqiqa oldin`
+  if (diffHours < 24) return `${diffHours} soat oldin`
+  if (diffDays === 1) return 'Kecha'
+  return `${diffDays} kun oldin`
 }
 </script>

@@ -246,9 +246,13 @@ const confirmReject = async () => {
 }
 
 const chatWithDriver = (orderId) => {
+  if (!orderId) {
+    console.error('Order ID is undefined')
+    return
+  }
+  console.log('Chat with driver for order:', orderId)
   router.push(`/chat/${orderId}`)
 }
-
 const formatPrice = (price) => {
   if (!price) return '0'
   return new Intl.NumberFormat('uz-UZ').format(price)
